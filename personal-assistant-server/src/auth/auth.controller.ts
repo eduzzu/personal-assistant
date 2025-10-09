@@ -3,14 +3,14 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/DTOs/createUserDTO';
 import {
-  RequestPasswordResetDto,
-  ResetPasswordDto,
+  RequestPasswordResetDto
 } from 'src/DTOs/requestPasswordResetDTO';
 
 @Controller('auth')
@@ -63,7 +63,7 @@ export class AuthController {
   }
 
   @Post('reset-password')
-  async resetPassword(@Body() dto: ResetPasswordDto) {
-    return this.authService.resetPassword(dto.token, dto.newPassword);
+  async resetPassword(@Param() token: string, @Body() newPassword: string) {
+    return this.authService.resetPassword(token, newPassword);
   }
 }

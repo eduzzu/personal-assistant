@@ -5,6 +5,7 @@ import {
   Conversation,
   ConversationDocument,
 } from 'src/schemas/conversation.schema';
+import { UserDocument } from 'src/schemas/user.schema';
 import { GroqService } from 'src/services/groq.service';
 
 @Injectable()
@@ -12,23 +13,22 @@ export class ConversationService {
   constructor(
     @InjectModel(Conversation.name)
     private conversationModel: Model<ConversationDocument>,
-    private groqService: GroqService
+    private groqService: GroqService,
+    @InjectModel('User') private userModel: Model<UserDocument>,
   ) {}
 
   getConversations = async (userId: string): Promise<Conversation[]> => {
-     const objectId = new Types.ObjectId(userId);
-    
+    const objectId = new Types.ObjectId(userId);
+
     const conversations = await this.conversationModel
       .find({ user: objectId })
-      .sort({ lastActive: -1 }) 
+      .sort({ lastActive: -1 })
       .exec();
-    
+
     return conversations;
   };
 
-  getConversation = async (
-    conversationId: string,
-  ): Promise<Conversation> => {
+  getConversation = async (conversationId: string): Promise<Conversation> => {
     const existingConversation = await this.conversationModel.findOne({
       _id: conversationId,
     });
@@ -48,67 +48,105 @@ export class ConversationService {
     return conversation;
   };
 
-  addMessageWithAi = async(
+  addMessageWithAi = async (
     conversationId: string | null,
     userId: string,
-    userMessage: string
+    userMessage: string,
   ): Promise<ConversationDocument> => {
-    const conversation = await this.conversationModel.findOne({_id: conversationId});
-    if(!conversation){
-      throw new NotFoundException("Conversation not found.");
-    }
-    conversation.messages.push({
-      sender: userId,
-      content: userMessage,
-      timestamp: new Date(),
-      type: 'user',
-    });
+    const session = await this.conversationModel.db.startSession();
+    session.startTransaction();
+    try {
+      const conversation = await this.conversationModel.findOne({
+        _id: conversationId,
+      });
+      if (!conversation) {
+        throw new NotFoundException('Conversation not found.');
+      }
+      conversation.messages.push({
+        sender: userId,
+        content: userMessage,
+        timestamp: new Date(),
+        type: 'user',
+      });
 
-    const contextMessages = conversation.messages.slice(-10).map(msg => ({
-      role: msg.type === 'user' ? 'user' as const : 'assistant' as const,
-      content: msg.content
-    }));
+      const contextMessages = conversation.messages.slice(-10).map((msg) => ({
+        role: msg.type === 'user' ? ('user' as const) : ('assistant' as const),
+        content: msg.content,
+      }));
 
-    const aiResponse = await this.groqService.getAIResponse(contextMessages);
+      const aiResponse = await this.groqService.getAIResponse(contextMessages);
 
       conversation.messages.push({
         sender: 'AI',
         content: aiResponse!,
         timestamp: new Date(),
         type: 'AI',
-      })
+      });
       conversation.lastActive = new Date();
-      return await conversation.save();
+      const savedConversation = await conversation.save({ session });
+
+      await session.commitTransaction();
+      session.endSession();
+      return savedConversation;
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
     }
+  };
 
-  createConversationWithFirstMessage = async(
-  userId: string,
-  userMessage: string
-): Promise<ConversationDocument> => {
-  const conversation = new this.conversationModel({
-    user: userId,
-    name: `Conversation ${new Date()}`,
-    messages: [{
-      sender: userId,
-      content: userMessage,
-      timestamp: new Date(),
-      type: 'user',
-    }],
-    lastActive: new Date(),
-  });
+  createConversationWithFirstMessage = async (
+    userId: string,
+    userMessage: string,
+  ): Promise<ConversationDocument> => {
+    const session = await this.conversationModel.db.startSession();
+    session.startTransaction();
 
-  const aiResponse = await this.groqService.getAIResponse([
-    { role: "user", content: userMessage }
-  ]);
+    try {
+      const user = await this.userModel.findById(userId).session(session);
+      if (!user) throw new Error('User not found');
 
-  conversation.messages.push({
-    sender: 'AI',
-    content: aiResponse!,
-    timestamp: new Date(),
-    type: 'AI',
-  });
+      const conversation = new this.conversationModel({
+        user: user._id,
+        name: `Conversation ${new Date()}`,
+        messages: [
+          {
+            sender: userId,
+            content: userMessage,
+            timestamp: new Date(),
+            type: 'user',
+          },
+        ],
+        lastActive: new Date(),
+      });
 
-  return await conversation.save();
+      const savedConversation = await conversation.save({ session });
+
+      const aiResponse = await this.groqService.getAIResponse([
+        { role: 'user', content: userMessage },
+      ]);
+
+      if (aiResponse) {
+        savedConversation.messages.push({
+          sender: 'AI',
+          content: aiResponse,
+          timestamp: new Date(),
+          type: 'AI',
+        });
+        await savedConversation.save({ session });
+      }
+
+      user?.conversations!.push(savedConversation);
+      await user.save({ session });
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return savedConversation;
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
+    }
+  };
 }
-  }
-
