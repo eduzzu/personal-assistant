@@ -22,7 +22,10 @@ export default function Conversation({ conversation }: { conversation: any }) {
         key={conversation._id}
         className={ selectedConversation?._id === conversation._id ? `w-full bg-red-700 text-white p-2 rounded-xl` : `w-full hover:bg-red-700 hover:text-white p-2 rounded-xl`}
       >
-        {conversation.name.slice(12, 37)}
+        {conversation.name.length > 25
+  ? `${conversation.name.slice(0, 25)}...`
+  : conversation.name}
+
       </p>
     </div>
   );

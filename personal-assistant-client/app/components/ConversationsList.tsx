@@ -33,9 +33,9 @@ export default function ConversationsList() {
     //TODO: start new conversation method
 
   return (
-    <div className="w-1/5 flex flex-col items-start h-screen p-3 bg-white text-red-700 border-2 border-gray-300 gap-1 overflow-y-auto scrollbar-thin scrollbar-thumb-red-700 scrollbar-track-gray-200">
-        <button className="font-bold p-2 hover:bg-red-700 hover:text-white cursor-pointer rounded-xl">New Conversation</button>
-        <h2 className="w-fit p-2 font-bold">Conversations</h2>
+    <div className="w-1/4 flex flex-col items-start h-screen p-3 bg-white text-red-700 border-2 border-gray-300 gap-1 overflow-y-auto scrollbar-thin scrollbar-thumb-red-700 scrollbar-track-gray-200">
+        <h2 className="w-full font-bold p-2 hover:bg-red-700 hover:text-white cursor-pointer rounded-xl">New Conversation</h2>
+        <h2 className="w-full p-2 font-bold">Conversations</h2>
         <div className="w-full p-1 cursor-pointer rounded-xl">{conversations.map((c: IConversation) => {
            return <Conversation conversation={c} key={c._id} />
         })}</div>
