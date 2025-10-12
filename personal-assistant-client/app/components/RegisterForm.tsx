@@ -71,7 +71,7 @@ export default function RegisterForm() {
         touched,
         errors,
       }) => (
-        <div className="w-4/12 border-1 border-gray-200 rounded-2xl flex justify-center items-center bg-gray-50 p-8">
+        <div className="w-11/12 md:w-4/12 border-1 border-gray-200 rounded-2xl flex justify-center items-center bg-gray-50 p-8">
           <form
             onSubmit={handleSubmit}
             className="grid w-full grid-cols-1 gap-6"
@@ -214,12 +214,12 @@ export default function RegisterForm() {
 
             <button
               type="submit"
-              className="w-full bg-red-700 text-white p-2 rounded-2xl cursor-pointer"
+              className="w-full bg-blue-400 text-white p-2 rounded-2xl cursor-pointer"
             >
               Register
             </button>
             <div className="flex justify-between">
-              <p className="text-sm text-right cursor-pointer text-red-700">
+              <p className="text-sm text-right cursor-pointer text-blue-400">
                 <Link href="/">Already have an account? Sign In.</Link>
               </p>
             </div>

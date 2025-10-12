@@ -4,11 +4,13 @@ import { IConversation } from '@/app/interfaces/IConversation';
 interface ConversationState {
   selectedConversation: IConversation | null;
   conversations: IConversation[];
+  isSideBarOpen: boolean
 }
 
 const initialState: ConversationState = {
   selectedConversation: null,
   conversations: [],
+  isSideBarOpen: true
 };
 
 const conversationSlice = createSlice({
@@ -18,7 +20,7 @@ const conversationSlice = createSlice({
     setConversations(state, action: PayloadAction<IConversation[]>) {
       state.conversations = action.payload;
     },
-    setSelectedConversation(state, action: PayloadAction<IConversation>) {
+    setSelectedConversation(state, action: PayloadAction<IConversation | null>) {
       state.selectedConversation = action.payload;
     },
     addConversation(state, action: PayloadAction<IConversation>) {
@@ -32,6 +34,7 @@ const conversationSlice = createSlice({
         state.selectedConversation = action.payload;
       }
     },
+   
   },
 });
 

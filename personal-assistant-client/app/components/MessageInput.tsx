@@ -9,13 +9,11 @@ export default function MessageInput() {
   );
   const [message, setMessage] = useState("");
 
-  if (!conversation) return null;
-
   const handleSend = async () => {
     if (!message.trim()) return;
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_S_API}/conversation/${conversation._id}`,
+      `${process.env.NEXT_PUBLIC_S_API}/conversation/${conversation!._id}`,
       {
         method: "POST",
         headers: {
@@ -32,17 +30,19 @@ export default function MessageInput() {
   };
 
   return (
-    <div className="flex gap-2 mt-2">
+    <div className="flex gap-2">
       <input
         type="text"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        className="flex-1 border border-gray-400 rounded-full p-2 mb-4"
+        onKeyDown={(e) => e.key === "Enter" && handleSend()}
+        className="flex-1 border border-gray-400 rounded-full p-2"
         placeholder="Type a message..."
       />
       <button
+        type="submit"
         onClick={handleSend}
-        className="bg-red-700 text-white rounded-full pt-2 pb-2 pl-4 pr-4 mb-4"
+        className="bg-red-300 text-white rounded-full pt-2 pb-2 pl-4 pr-4 cursor-pointer"
       >
         <svg
           className="w-6 h-6 text-gray-800 dark:text-white"

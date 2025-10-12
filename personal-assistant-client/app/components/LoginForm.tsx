@@ -76,7 +76,7 @@ export default function LoginForm() {
         touched,
         errors,
       }) => (
-        <div className="w-4/12 border-1 border-gray-200 rounded-2xl flex justify-center items-center bg-gray-50 p-8">
+        <div className=" w-11/12 md:w-4/12 border-1 border-gray-200 rounded-2xl flex justify-center items-center bg-gray-50 p-8">
           <form
             onSubmit={handleSubmit}
             className="grid w-full grid-cols-1 gap-6"
@@ -169,16 +169,16 @@ export default function LoginForm() {
             </fieldset>
             <button
               type="submit"
-              className="w-full bg-red-700 text-white p-2 rounded-2xl cursor-pointer"
+              className="w-full bg-red-300 text-white p-2 rounded-2xl cursor-pointer"
             >
               Login
             </button>
             <div className="flex justify-between">
-              <p className="text-sm text-left text-red-700">
+              <p className="text-sm text-left text-red-300">
                 <Link href="/register">Don't have an account? Sign up</Link>
               </p>
               <p
-                className="text-sm text-right cursor-pointer text-red-700">
+                className="text-sm text-right cursor-pointer text-red-300">
                   <Link href="/request-reset-password">Forgot Password?</Link>
               </p>
             </div>

@@ -17,6 +17,7 @@
     "react-router-dom": "^7.9.3",
     "redux-persist": "^6.0.0",
     "redux-thunk": "^3.1.0",
+    "swr": "^2.3.6",
     "yup": "^1.7.1"
   },
   "devDependencies": {

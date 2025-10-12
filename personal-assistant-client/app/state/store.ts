@@ -3,11 +3,13 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authSlice from './slices/authSlice';
 import conversationsSlice from './slices/conversationsSlice';
+import uiSlice from './slices/uiSlice';
 
 const store = configureStore({
     reducer: {
         auth: authSlice,
-        conversations: conversationsSlice
+        conversations: conversationsSlice,
+        uiSlice: uiSlice
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
