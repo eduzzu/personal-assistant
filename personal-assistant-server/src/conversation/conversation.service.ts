@@ -102,7 +102,7 @@ export class ConversationService {
     const session = await this.conversationModel.db.startSession();
     session.startTransaction();
 
-      const aiTitle = await this.generateTitleFromAI(userMessage);
+    const aiTitle = await this.generateTitleFromAI(userMessage);
 
     try {
       const user = await this.userModel.findById(userId).session(session);
@@ -153,17 +153,22 @@ export class ConversationService {
   };
 
   private async generateTitleFromAI(message: string): Promise<string> {
-   const prompt = `
-  Generate a short conversation title (max 6 words) based on this message.
-  - IMPORTANT: Keep the same language as the original message
-  - No emojis, no quotes, no punctuation
-  - Keep it concise and relevant
-  Message: "${message}"`;
+  const prompt = `Generate a short title (maximum 6 words) for this message. Use the message language. Reply ONLY with the title, no explanations, no quotes, no punctuation:
+
+"${message}"
+
+Title:`;
+  
   const aiResponse = await this.groqService.getAIResponse([
-    { role: "user", content: prompt }
+    { role: 'user', content: prompt },
   ]);
 
-  return aiResponse?.trim() || "New Conversation";
+  let title = aiResponse?.trim() || 'New Conversation';
+  
+  title = title.replace(/^["'\-•\s]+|["'\-•\s.,:;!?]+$/g, '');
+  
+  const words = title.split(/\s+/).slice(0, 6);
+  
+  return words.join(' ') || 'New Conversation';
 }
-
 }

@@ -8,8 +8,5 @@ export interface IUser {
     lastName: string;
     birthDate: Date;
     role: "USER" | "ADMIN";
-    theme?: "light" | "dark";
-    notifications?: boolean;
-    language?: string;
     conversations?: Conversation[];
 }
